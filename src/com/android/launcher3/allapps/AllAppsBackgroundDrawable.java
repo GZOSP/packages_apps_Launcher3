@@ -91,6 +91,9 @@ public class AllAppsBackgroundDrawable extends Drawable {
         }
     }
 
+    /** The system setting for System Themes **/
+    private static final String SYSTEM_THEME_STYLE = "system_theme_style";
+
     protected final TransformedImageDrawable mHand;
     protected final TransformedImageDrawable[] mIcons;
     private final int mWidth;
@@ -103,10 +106,25 @@ public class AllAppsBackgroundDrawable extends Drawable {
         mWidth = res.getDimensionPixelSize(R.dimen.all_apps_background_canvas_width);
         mHeight = res.getDimensionPixelSize(R.dimen.all_apps_background_canvas_height);
 
-        context = new ContextThemeWrapper(context,
-                Themes.getAttrBoolean(context, R.attr.isMainColorDark)
+        final int systemTheme = Settings.System.getInt(context.getContentResolver(), SYSTEM_THEME_STYLE, 0);
+
+        switch (systemTheme) {
+            case 1: /*Light Theme*/
+                context = new ContextThemeWrapper(context, R.style.AllAppsEmptySearchBackground);
+                break;
+            case 2: /*Dark Theme*/
+                context = new ContextThemeWrapper(context, R.style.AllAppsEmptySearchBackground_Dark);
+                break;
+            case 3: /*Black Theme*/
+                context = new ContextThemeWrapper(context, R.style.AllAppsEmptySearchBackground_Black);
+                break;
+            default:
+                context = new ContextThemeWrapper(context, Themes.getAttrBoolean(context, R.attr.isMainColorDark)
                         ? R.style.AllAppsEmptySearchBackground_Dark
                         : R.style.AllAppsEmptySearchBackground);
+                break;
+        }
+
         mHand = new TransformedImageDrawable(context, R.drawable.ic_all_apps_bg_hand,
                 0.575f, 0.f, Gravity.CENTER_HORIZONTAL);
         mIcons = new TransformedImageDrawable[4];

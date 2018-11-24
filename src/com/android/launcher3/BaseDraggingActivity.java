@@ -56,6 +56,9 @@ public abstract class BaseDraggingActivity extends BaseActivity
     // automatically when user interacts with the launcher.
     public static final Object AUTO_CANCEL_ACTION_MODE = new Object();
 
+    /** The system setting for System Themes **/
+    private static final String SYSTEM_THEME_STYLE = "system_theme_style";
+
     private ActionMode mCurrentActionMode;
     protected boolean mIsSafeModeEnabled;
 
@@ -279,5 +282,33 @@ public abstract class BaseDraggingActivity extends BaseActivity
     public interface OnStartCallback<T extends BaseDraggingActivity> {
 
         void onActivityStart(T activity);
+    }
+
+    private void updateTheme(WallpaperColorInfo wallpaperColorInfo) {
+        ContentResolver resolver = this.getContentResolver();
+        final boolean supportsDarkText = wallpaperColorInfo.supportsDarkText();
+        final int systemTheme = Settings.System.getInt(resolver, SYSTEM_THEME_STYLE, 0);
+        switch (systemTheme) {
+            case 1: /*Light Theme*/
+                setTheme(supportsDarkText ? R.style.AppTheme_DarkText : R.style.AppTheme);
+                break;
+            case 2: /*Dark Theme*/
+                setTheme(supportsDarkText ? R.style.AppTheme_Dark_DarkText : R.style.AppTheme_Dark);
+                break;
+            case 3: /*Black Theme*/
+                setTheme(supportsDarkText ? R.style.AppTheme_Black_DarkText : R.style.AppTheme_Black);
+                break;
+            default:
+                if (mUiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_AUTO) {
+                    setTheme(wallpaperColorInfo.supportsDarkText() ? R.style.AppTheme_DarkText :
+                            R.style.AppTheme);
+                } else if (mUiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES) {
+                    setTheme(wallpaperColorInfo.supportsDarkText() ? R.style.AppTheme_Dark_DarkText :
+                            R.style.AppTheme_Dark);
+                } else {
+                    setTheme(mThemeRes);
+                }
+                break;
+        }
     }
 }
